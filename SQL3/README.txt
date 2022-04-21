@@ -1,3 +1,5 @@
+map api: AIzaSyD-F9PkcMOHcDp5Zht0WTEP20tWLj0BDAk
+
 在当前目录，先在 terminal 输入 sqlite3，来打开 sqlite3 ，注：ctr + d 是退出
 
 .open spot.db 来打开这个 database，如果 database 不存在，就创建这个
@@ -19,6 +21,8 @@ INSERT INTO Users(email, secret, name) VALUES(‘admin@saveaspot.com’, ‘Save
 
 .read ../server/DB/script.js/create.sql
 
+.read ../server/DB/script.js/insert.sql
+
 
 查看 table 结构
 
@@ -32,3 +36,5 @@ insert into user (username, password, stuid) values ('richard', '123', '41174153
 DELETE FROM user Where username = 'richard';
 
 Lin - zhuzhu
+
+select locname, time, username, description from post join user on post.userid = user.id order by time desc;

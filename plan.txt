@@ -6,6 +6,7 @@ https://dribbble.com/account/authentications/new
 bookmark
 https://dribbble.com/goods/927002-Knitting-and-Crocheting-Patterns-set?token=gAAAAABiTekkSFx-TYB9Kp6QKL_He6M-j0DKUbltm0jzc0xIe9HGRbutuuBZUaD9mf8XaffEFY1tmVddNQiLV7T-MLQMD0c7mJSCZkJGw2ntBq_SxSR3YyOnL-0S3MH2RUe5XyJ4LGJa8fjVwGcup-aBxURESzdEzb_Dkxj5kkteWllvMk63r6Y%3D&utm_source=Clipboard_Good&utm_campaign=Ksuview&utm_content=Knitting%20and%20Crocheting%20Patterns%20set&utm_medium=Social_Share&utm_source=Clipboard_Good&utm_campaign=undefined&utm_content=Knitting%20and%20Crocheting%20Patterns%20set&utm_medium=Social_Share
 
+1075129192035
 
 +++++++ 功能 ++++++++
 
@@ -94,6 +95,11 @@ view post 的时候，可以看到 profile img 是圆形？或者方？ 还有�
 所有 info 或者 提示，都用黑色方块，白色字体，滑动一下，消失。session timeout 也可以放在这里
 
 所有对钩，都可以弄成一样的
+
+
+
+
+
 
 
 

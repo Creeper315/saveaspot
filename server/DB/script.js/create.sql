@@ -13,27 +13,34 @@ CREATE TABLE User (
 
 CREATE TABLE Post (
     id INTEGER PRIMARY KEY,
-    requesterid integer NOT NULL,
-    time TINYTEXT NOT NULL,
+    userId integer NOT NULL,
+    time TINYTEXT NOT NULL,   -- 'YYYYMMDD'
     description text,
-    locationid integer,
-    helper integer ,
+    locName not null,
+    helper TINYTEXT ,
     reward text,
-    visible INTEGER, -- SQLite doesn't have Boolean type, use 0 and 1 instead. 1-visible . 0-invisible.
-    lat DECIMAL,
-    long DECIMAL,
+    -- visible INTEGER, -- SQLite doesn't have Boolean type, use 0 and 1 instead. 1-visible . 0-invisible.
     picture text,
-    foreign key (requesterid) references user (id),
-    foreign key (locationid) references location (id)
+    foreign key (userId) references user (id),
+    foreign key (helper) references user (username), 
+    foreign key (locName) references location (locname)
 );
 
 create table Location (
     id INTEGER PRIMARY KEY,
-    locname TINYTEXT not null,
+    locname TINYTEXT unique not null,
     lat DECIMAL,
     long DECIMAL,
     picture text
 );
+
+create table Saved (
+    id integer primary key,
+    userId integer not null,
+    postId integer not null,
+    foreign key (userid) references user (id),
+    foreign key (postId) references post (id)
+)
 
 -- CREATE UNIQUE INDEX uniemail ON user(email) WHERE email IS NOT NULL;
 

@@ -1,4 +1,4 @@
-const { hashPassword, reHashPassword, replaceNull } = require('../helper');
+const { hashPassword, reHashPassword, createToken } = require('../helper');
 const jwt = require('jsonwebtoken');
 const {
     updateUser,
@@ -17,19 +17,21 @@ async function login(req, res) {
         throw 'User Does Not Exist';
     }
     let hashed = await reHashPassword(password, got.salt);
-    console.log('LOGIN password, hashed , got', password, hashed, got.password);
+    // console.log('LOGIN password, hashed , got', password, hashed, got.password);
 
     if (got.password != hashed) {
         throw 'Password Incorrect';
     }
-
-    res.status(200).json(got.id);
+    initCookie(res, { name: got.username, id: got.id });
+    delete got.password;
+    delete got.salt;
+    res.status(200).json(got);
 }
 
 async function register(req, res) {
     let userObj = req.body;
     // userObj = replaceNull(userObj);
-    console.log('to register obj ', userObj);
+    // console.log('to register obj ', userObj);
     let exist = await checkExist(userObj);
     if (exist) {
         res.status(400).send(exist);
@@ -38,11 +40,14 @@ async function register(req, res) {
     // console.log('password, hashed ', userObj.password, hashed);
     userObj.password = hashed;
     userObj.salt = salt;
-    console.log('to register obj 2', userObj);
+    // console.log('to register obj 2', userObj);
 
     let createdUserId = await addUser(userObj);
-
-    res.status(200).json(createdUserId);
+    initCookie(res, { name: userObj.username, id: createdUserId });
+    delete userObj.password;
+    delete userObj.salt;
+    userObj.id = createdUserId;
+    res.status(200).json(userObj);
 }
 
 async function test(req, res, next) {
@@ -69,80 +74,26 @@ async function test(req, res, next) {
     // let r = await addUser2(o);
     // res.status(200).json(r);
     // console.log('test result :', r.null, r['null']);
-
-    console.log();
-    let str = req.headers.authorization;
-    let token = str && str.split(' ')[1];
-    if (token == undefined) {
-        res.status(401);
-    }
-    jwt.verify(token, process.env.ACCESS_TOKEN, (err, info) => {
-        console.log('info ', info);
-        if (err) {
-            console.log('err', err);
-        }
-        req.info = info;
-        next();
-    });
 }
 // res.cookie('cookie1' : { name: 'Leo' }).cookie('cookie2' : 'Teste').send()
 
-async function cookie(req, res) {
+function initCookie(res, userInfo) {
     // httponly, secure:
     // assume login success here.
-
-    let u = {
-        username: 'bob',
-        id: '3',
-    };
-    let token1 = jwt.sign(u, process.env.ACCESS_TOKEN);
-    let token2 = jwt.sign(u, process.env.REFRESH_TOKEN);
+    // res.clearCookie('c1');
+    // res.clearCookie('c2');
+    let token1 = createToken(userInfo, 'access');
+    let token2 = createToken(userInfo, 'refresh');
     res.cookie('ACCESS_TOKEN', token1);
     res.cookie('REFRESH_TOKEN', token2);
-    res.send('cookie success?');
+    // res.send('cookie success?');
     // res.status(200).json(c);
-}
-async function authMiddle(req, res, next) {
-    // user 拿到 token，现在准备 request，
-    console.log('auth middle req c ', req.cookies);
-    let token = req.cookies.ACCESS_TOKEN;
-    if (token == undefined) {
-        res.status(401).end();
-    }
-    jwt.verify(token, process.env.ACCESS_TOKEN, (err, info) => {
-        console.log('info ', info);
-        if (err) {
-            console.log('err', err);
-            res.status(403).end();
-        }
-        req.info = info; // Here we set req 里面的一个 值，后面就能直接用 info
-        console.log('success info ', info);
-        next();
-    });
-}
-async function refresh(req, res) {
-    console.log('refresh req c', req.cookies);
-    let token2 = req.cookies.REFRESH_TOKEN;
-    if (token2 == undefined) {
-        res.status(401).end();
-    }
-
-    jwt.verify(token2, process.env.REFRESH_TOKEN, (err, u) => {
-        if (err) {
-            res.status(403).end();
-        }
-        console.log('from refresh u', u);
-        const newToken = jwt.sign(u, process.env.ACCESS_TOKEN);
-        // req.cookie
-        res.json(newToken);
-    });
 }
 
 module.exports = {
     login,
     register,
     test,
-    cookie,
-    authMiddle,
-    refresh,
+    // authMiddle,
+    // refresh,
 };
