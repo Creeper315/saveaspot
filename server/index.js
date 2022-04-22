@@ -21,7 +21,7 @@ const helperController = require('./controller/helperController');
 app.use(express.json());
 app.use(cookieParser());
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT || PORT, () => {
     console.log(`App listening - Port ${PORT}`);
 });
 
