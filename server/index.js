@@ -5,6 +5,7 @@ const app = express();
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
 // const Path = require('path');
+const cors = require('cors');
 const PORT = 3001;
 const { gError, authMiddle } = require('./helper');
 const authController = require('./controller/authController');
