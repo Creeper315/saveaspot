@@ -18,8 +18,20 @@ const helperController = require('./controller/helperController');
 // let token = jwt.sign(info, process.env.ACCESS_TOKEN);
 // console.log('TOKEN ,', token);
 
+// https://master--musical-buttercream-7dbada.netlify.app
+
 app.use(express.json());
 app.use(cookieParser());
+
+const corsOptions = {
+    origin: [
+        'https://master--musical-buttercream-7dbada.netlify.app',
+        'https://localhost:3000',
+    ],
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors);
 
 app.listen(process.env.PORT || PORT, () => {
     console.log(`App listening - Port ${PORT}`);
