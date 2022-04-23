@@ -6,7 +6,6 @@
   "scripts": {
     "start": "node server/index.js"
   },
-  "proxy": "http://localhost:3001",
   "keywords": [],
   "author": "",
   "license": "ISC",
