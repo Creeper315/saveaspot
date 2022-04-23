@@ -22,10 +22,6 @@ const helperController = require('./controller/helperController');
 // https://master--musical-buttercream-7dbada.netlify.app
 
 // https://62637aff6aac8b00095c91db--musical-buttercream-7dbada.netlify.app/login
-
-app.use(express.json());
-app.use(cookieParser());
-
 const corsOptions = {
     origin: [
         'https://master--musical-buttercream-7dbada.netlify.app',
@@ -36,6 +32,8 @@ const corsOptions = {
 
 // app.use(cors(corsOptions));
 app.use(cors());
+app.use(express.json());
+app.use(cookieParser());
 
 app.listen(process.env.PORT || PORT, () => {
     console.log(`App listening - Port ${PORT}`);

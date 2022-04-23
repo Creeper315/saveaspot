@@ -23,6 +23,7 @@ async function login(req, res) {
         throw 'Password Incorrect';
     }
     initCookie(res, { name: got.username, id: got.id });
+    console.log('what is res.cookie', res.cookie);
     delete got.password;
     delete got.salt;
     res.status(200).json(got);
@@ -84,6 +85,7 @@ function initCookie(res, userInfo) {
     // res.clearCookie('c2');
     let token1 = createToken(userInfo, 'access');
     let token2 = createToken(userInfo, 'refresh');
+    console.log('My Access Token is: ', token1);
     res.cookie('ACCESS_TOKEN', token1);
     res.cookie('REFRESH_TOKEN', token2);
     // res.send('cookie success?');
