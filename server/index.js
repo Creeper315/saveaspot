@@ -57,42 +57,38 @@ app.post('/login', gError(authController.login));
 
 app.post('/register', gError(authController.register));
 
-// app.post('/getpost', authMiddle, gError(postController.getPageData));
+app.post('/getpost', authMiddle, gError(postController.getPageData));
 
-// app.get('/getlocation', authMiddle, gError(helperController.loadLocation));
+app.get('/getlocation', authMiddle, gError(helperController.loadLocation));
 
-// app.get('/getlocation', authMiddle, gError(helperController.loadLocation));
+app.post('/likeuser', authMiddle, gError(helperController.likeUser));
 
-// app.post('/likeuser', authMiddle, gError(helperController.likeUser));
+app.post('/postupdate', authMiddle, gError(postController.postUpdate));
 
-// app.post('/postupdate', authMiddle, gError(postController.postUpdate));
+app.post('/posthelp', authMiddle, gError(postController.postHelp));
 
-// app.post('/posthelp', authMiddle, gError(postController.postHelp));
+app.post('/postsave', authMiddle, gError(postController.postSave));
 
-// app.post('/postsave', authMiddle, gError(postController.postSave));
+app.post('/postdelete', authMiddle, gError(postController.postDelete));
 
-// app.post('/postdelete', authMiddle, gError(postController.postDelete));
+app.post('/checksaved', authMiddle, gError(postController.checkSaved));
 
-// app.post('/checksaved', authMiddle, gError(postController.checkSaved));
+app.post('/postedit', authMiddle, gError(postController.postEdit));
+//
+// app.post('/getpost', gError(postController.getPageData));
 
-// app.post('/postedit', authMiddle, gError(postController.postEdit));
+// app.get('/getlocation', gError(helperController.loadLocation));
 
-app.post('/getpost', gError(postController.getPageData));
+// app.post('/likeuser', gError(helperController.likeUser));
 
-app.get('/getlocation', gError(helperController.loadLocation));
+// app.post('/postupdate', gError(postController.postUpdate));
 
-app.get('/getlocation', gError(helperController.loadLocation));
+// app.post('/posthelp', gError(postController.postHelp));
 
-app.post('/likeuser', gError(helperController.likeUser));
+// app.post('/postsave', gError(postController.postSave));
 
-app.post('/postupdate', gError(postController.postUpdate));
+// app.post('/postdelete', gError(postController.postDelete));
 
-app.post('/posthelp', gError(postController.postHelp));
+// app.post('/checksaved', gError(postController.checkSaved));
 
-app.post('/postsave', gError(postController.postSave));
-
-app.post('/postdelete', gError(postController.postDelete));
-
-app.post('/checksaved', gError(postController.checkSaved));
-
-app.post('/postedit', gError(postController.postEdit));
+// app.post('/postedit', gError(postController.postEdit));
