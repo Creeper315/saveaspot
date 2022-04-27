@@ -63,7 +63,7 @@ function authMiddle(req, res, next) {
     // user 拿到 token，现在准备 request，
     // console.log('auth middle req c ', req.cookies);
     let token = req.cookies.ACCESS_TOKEN;
-    console.log('token got is : ', token);
+    // console.log('token got is : ', token);
     if (token == undefined) {
         res.status(401).send('token not provided').end();
     }

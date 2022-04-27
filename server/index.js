@@ -23,15 +23,12 @@ const helperController = require('./controller/helperController');
 
 // https://62637aff6aac8b00095c91db--musical-buttercream-7dbada.netlify.app/login
 const corsOptions = {
-    origin: [
-        'https://master--musical-buttercream-7dbada.netlify.app',
-        'https://localhost:3000',
-    ],
+    origin: ['https://localhost:3000'],
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
-// app.use(cors(corsOptions));
-app.use(cors());
+// app.use(cors(corsOptions)); // Only allow localhost accessing it
+// app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
@@ -42,10 +39,11 @@ app.listen(process.env.PORT || PORT, () => {
 });
 
 app.get('/', (req, res) => {
+    console.log('req.cookie ', req.cookies, 'req.info', req.info);
     res.send(' try get first');
 });
 
-app.post('/test', gError(authController.test));
+app.post('api/test', gError(authController.test));
 
 // app.post('/cookie', gError(authController.cookie));
 
@@ -53,27 +51,27 @@ app.post('/test', gError(authController.test));
 
 // app.post('/refresh', gError(authController.refresh));
 
-app.post('/login', gError(authController.login));
+app.post('api/login', gError(authController.login)); // authMiddle 不需要加在 login 和 register 上！
 
-app.post('/register', gError(authController.register));
+app.post('api/register', gError(authController.register));
 
-app.post('/getpost', authMiddle, gError(postController.getPageData));
+app.post('api/getpost', authMiddle, gError(postController.getPageData));
 
-app.get('/getlocation', authMiddle, gError(helperController.loadLocation));
+app.get('api/getlocation', authMiddle, gError(helperController.loadLocation));
 
-app.post('/likeuser', authMiddle, gError(helperController.likeUser));
+app.post('api/likeuser', authMiddle, gError(helperController.likeUser));
 
-app.post('/postupdate', authMiddle, gError(postController.postUpdate));
+app.post('api/postupdate', authMiddle, gError(postController.postUpdate));
 
-app.post('/posthelp', authMiddle, gError(postController.postHelp));
+app.post('api/posthelp', authMiddle, gError(postController.postHelp));
 
-app.post('/postsave', authMiddle, gError(postController.postSave));
+app.post('api/postsave', authMiddle, gError(postController.postSave));
 
-app.post('/postdelete', authMiddle, gError(postController.postDelete));
+app.post('api/postdelete', authMiddle, gError(postController.postDelete));
 
-app.post('/checksaved', authMiddle, gError(postController.checkSaved));
+app.post('api/checksaved', authMiddle, gError(postController.checkSaved));
 
-app.post('/postedit', authMiddle, gError(postController.postEdit));
+app.post('api/postedit', authMiddle, gError(postController.postEdit));
 //
 // app.post('/getpost', gError(postController.getPageData));
 
