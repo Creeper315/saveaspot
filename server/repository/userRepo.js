@@ -1,26 +1,17 @@
 const UserTable = require('../model/user');
 const db = require('../DB/db').client;
 
-// id, username, password, stuid, phone, email, picture
+//  username, password, salt, phone, email, userpic
 
-async function addUser({
-    username,
-    email,
-    password,
-    salt,
-    stuid,
-    phone,
-    picture,
-}) {
+async function addUser({ username, email, password, salt, phone, userpic }) {
     try {
         const r = await UserTable.create({
             username: username,
             email: email,
             password: password,
             salt: salt,
-            stuid: stuid,
             phone: phone,
-            picture: picture,
+            userpic: userpic,
         });
         // console.log('addUser2 result ', r);
         return r.null; // 这个 r.null 就是新创建的 user 的 id
@@ -30,17 +21,9 @@ async function addUser({
     }
 }
 
-async function addUserNotUsed({
-    username,
-    email,
-    password,
-    stuid,
-    phone,
-    picture,
-}) {
+async function addUserNotUsed({ username, email, password, phone, userpic }) {
     const [results, metadata] = await db.query(
-        `insert into user (username, email, password, stuid, phone, picture) values (${username}, ${email}, ${password}, ${stuid},${phone},${picture});`
-        // `insert into user (username, email, password, stuid, phone, picture) values ("${username}", "${email}", "${password}", "${stuid}","${phone}","${picture}");`
+        `insert into user (username, email, password, phone, userpic) values (${username}, ${email}, ${password},${phone},${userpic});`
     );
     console.log('Add User ', results, 'META ', metadata, metadata.lastID);
     return metadata.lastID;
@@ -54,29 +37,24 @@ async function updateUser(userObj) {
     // 如果发现想 update 的 email，或者 username，已经存在，不 update 并且告诉 user 已存在
 
     // console.log('update start');
-    let id = userObj.id;
-    delete userObj.id;
-    if (id == undefined) {
-        throw '? ID is not given when update';
+
+    if (userObj.username == undefined) {
+        throw '? Username is not given when update';
     }
     let exist = await checkExist(userObj);
-    // try {
     if (exist) {
-        console.log('in update, Not Unique ', exist);
+        console.log('ERR: in update user ', exist);
         throw exist;
-        // throw new Error(exist);
     }
-    // console.log('BEFORE UPDATE, id, obj ', id, userObj);
-
-    // check that some "NOT NULL" fields are not set to null or undefined.
-    //
+    let username = userObj.username;
+    delete userObj.username;
 
     let result = await UserTable.update(userObj, {
         where: {
-            id: id,
+            username: username,
         },
     });
-    // console.log('update result ', result);
+    console.log('update result ', result);
     return result;
     // } catch (err) {
     //     // throw new Error(err);
@@ -85,45 +63,26 @@ async function updateUser(userObj) {
 }
 
 async function checkExist(userObj) {
-    // check if user already exist, based on username or student id or email
+    // 因为 USERNAME 是 PK，所以 Username 设定为无法改变！
+
     let errorMsg = '';
     // console.log('check unique start ', userObj);
-    let sql = `select * from user where username = "${userObj.username}" or stuid = "${userObj.stuid}" or email = "${userObj.email}"`;
+    let sql = `select username from user where username<>"${userObj.username}" and email = "${userObj.email}"`;
     const [exist] = await db.query(sql);
-    // console.log('check unique ', exist);
-    if (exist.length > 20) {
-        errorMsg = 'Username or Student Number or Email already exist';
-    } else {
-        for (let e of exist) {
-            if (e.username != null && e.username == userObj.username) {
-                errorMsg += ' Username already exist.';
-            }
-            if (e.stuid != null && e.stuid == userObj.stuid) {
-                errorMsg += ' Student Number already exist.';
-            }
-            if (e.email != null && e.email == userObj.email) {
-                errorMsg += ' Email already exist.';
-            }
-        }
-    }
 
-    // console.log('unique msg ', errorMsg);
-    if (errorMsg != '') {
+    if (exist.length > 0) {
+        errorMsg = 'Email already exist';
         return errorMsg;
     }
     return false;
 }
 
-async function getUser({ id, username, stuid, email }) {
+async function getUser({ username, email }) {
     // get list of user satisfying one of these values. (因为这些值都是 unique，所以按理说只会拿到 1 个 row 的 user)
-    // console.log('get user ', [id, username, stuid, email]);
+    // console.log('get user ', [id, username, email]);
     let sql = '';
-    if (id != undefined) {
-        sql = `select * from user where id = ${id}`;
-    } else if (username != undefined) {
+    if (username != undefined) {
         sql = `select * from user where username = "${username}"`;
-    } else if (stuid != undefined) {
-        sql = `select * from user where stuid = "${stuid}"`;
     } else if (email != undefined) {
         sql = `select * from user where email = "${email}"`;
     } else {
@@ -138,4 +97,25 @@ async function getUser({ id, username, stuid, email }) {
     return found[0];
 }
 
-module.exports = { addUser, updateUser, checkExist, getUser };
+async function joinUser(username, postid) {
+    let SQL = `insert into joiner (username, postid) values ("${username}", ${postid});`;
+
+    let r = await db.query(SQL);
+    return r;
+}
+
+async function cancelJoinUser(username, postid) {
+    let SQL = `delete from joiner where username="${username}" and postid= ${postid};`;
+
+    let r = await db.query(SQL);
+    return r;
+}
+
+module.exports = {
+    addUser,
+    updateUser,
+    checkExist,
+    getUser,
+    joinUser,
+    cancelJoinUser,
+};

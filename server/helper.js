@@ -21,10 +21,9 @@ function replaceNull(obj) {
         username: null,
         password: null,
         salt: null,
-        stuid: null,
         phone: null,
         email: null,
-        picture: null,
+        userpic: null,
     };
     for (let [k, v] of Object.entries(obj)) {
         if (v != undefined) {
@@ -45,7 +44,7 @@ function gError(func) {
 }
 
 function createToken(data, type) {
-    console.log('Process Env Exist? ', process.env.ACCESS_TOKEN);
+    // console.log('Process Env Exist? ', process.env.ACCESS_TOKEN);
     if (type == 'access') {
         var token = jwt.sign(data, process.env.ACCESS_TOKEN, {
             expiresIn: 100,
@@ -97,7 +96,7 @@ function refresh(req, res) {
             res.status(403).send(err).end();
         }
         // console.log('from refresh u', u);
-        let newToken = createToken({ name: u.name, id: u.id }, 'access');
+        let newToken = createToken({ username: u.username }, 'access');
         req.info = u;
         // res.clearCookie('ACCESS_TOKEN');
 

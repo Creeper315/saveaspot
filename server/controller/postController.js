@@ -1,7 +1,7 @@
 const { del } = require('express/lib/application');
 const req = require('express/lib/request');
 const {
-    getPost,
+    excQuery,
     updatePost,
     createPost,
     deletePost,
@@ -10,6 +10,7 @@ const {
     checksaved,
 } = require('../repository/postRepo');
 const { updateUser } = require('../repository/userRepo');
+// const { onPostDelete } = require('../repository/helperRepo');
 
 const init_state = {
     listLocation: [], // Array of location name
@@ -24,47 +25,35 @@ const init_state = {
 
 // req.info === { name: u.name, id: u.id }
 
-async function postHelp(req, res) {
-    let { toHelp, postId } = req.body;
-    let username = req.info.name;
-
-    if (toHelp) {
-        var r = await updatePost({ postid: postId, helper: username });
-    } else {
-        var r = await updatePost({ postid: postId, helper: null });
-    }
-    res.status(200).send('help success');
-}
-
 async function postSave(req, res) {
-    let { toSave, postId } = req.body;
-    let userid = req.info.id;
+    let { toSave, postid } = req.body;
+    let username = req.info.username;
 
     if (toSave) {
-        var r = await savePost(userid, postId);
+        var r = await savePost(username, postid);
     } else {
-        var r = await saveDelete(userid, postId);
+        var r = await saveDelete(username, postid);
     }
     res.status(200).send('save success');
 }
 
 async function postDelete(req, res) {
-    let id = req.body.postId;
-    let r = await deletePost(id);
+    let postid = req.body.postid;
+    console.log('? postid dlt', req.body);
+    let r = await deletePost(postid); // 还要 delete 掉 所有的 saved，和 joined！
+    // await onPostDelete(postid);
     res.status(200).send('delete success');
 }
 
 async function checkSaved(req, res) {
-    let { postId } = req.body;
-    let userId = req.info.id;
-    console.log('check --- ', userId, postId);
-    let result = await checksaved(userId, postId);
+    let { postid } = req.body;
+    let username = req.info.username;
+    let result = await checksaved(username, postid);
     res.status(200).send(result);
 }
 
 async function postUpdate(req, res) {
     let postObj = req.body;
-    console.log('body !!!!!!!', req.body);
 
     let r = await updatePost(postObj);
     res.status(200);
@@ -72,13 +61,14 @@ async function postUpdate(req, res) {
 
 async function postEdit(req, res) {
     let { postObj, userObj } = req.body;
-    userObj.id = req.info.id;
-    console.log('update body !!!!!!!', postObj, userObj);
+    userObj.username = req.info.username;
+    // userObj.id = req.info.id;
+    // console.log('update body !!!!!!!', postObj, userObj);
 
     let r = await updatePost(postObj);
     let u = await updateUser(userObj);
-    console.log('update result ', r, u);
-    res.status(200);
+    // console.log('update result ', r, u);
+    res.status(200).send();
 }
 
 // SideBar 只用来 Edit personal profile. 比如 头像，名字，contact information
@@ -86,75 +76,48 @@ async function postEdit(req, res) {
 // async function getTotalNumPosts(){
 //     let sql = `select count(*) from `
 // }
-function filterRequirement(filterOption, myId, myName) {
-    // select .... from ... where (return)
-    let sql = '';
-    let condition = [];
 
-    if (filterOption.listLocation.length > 0) {
-        let str = filterOption.listLocation;
+// select * from post where username<>"Lin" and locname in (...) and activity in (...) limit xxx offset xxx;
+// where xx and xx and xx and not exist (select * from joiner where username="Lin" and post)
+
+// select id from post where username<>"Richard" and not exist (select * from joiner where joiner.username="Richard" and joiner.postid=post.id);
+// select id from post where username<>"Richard" and id not in (select postid from joiner where joiner.username="Richard");
+
+function filterCondition(option, myName) {
+    let condition = ` where username<>"${myName}" `;
+    if (option.listLocation.length > 0) {
+        let str = option.listLocation;
         str = str.map((e) => {
             return `"${e}"`;
         });
         str.join(', ');
-        str = 'pp.locname in (' + str + ')';
-        console.log('joined - ', str);
-        condition.push(str);
+        str = ' (' + str + ') ';
+        condition += ' and ' + 'locname in ' + str;
     }
-    if (filterOption.ownPost == true) {
-        let str = `pp.userid=${myId}`;
-        condition.push(str);
-    } else if (filterOption.userId != null) {
-        let str = `pp.userid=${filterOption.userId}`;
-        condition.push(str);
+    if (option.listActivity.length > 0) {
+        let str = option.listActivity;
+        str = str.map((e) => {
+            return `"${e}"`;
+        });
+        str.join(', ');
+        str = ' (' + str + ') ';
+        condition += ' and ' + 'activity in ' + str;
     }
-    if (filterOption.saved) {
-        let str = `pp.id in (select postid from saved where userid=${myId})`;
-        condition.push(str);
-    }
-    if (filterOption.helpedByMe) {
-        let str = `pp.id in (select id from post where helper="${myName}")`;
-        condition.push(str);
-    }
-    if (condition.length) {
-        sql += ' where ';
-        sql += condition.join(' and ');
-    }
-    return sql;
-}
-function getPageStr(pageSize, onPage) {
-    let off = (onPage - 1) * pageSize;
-    let str = ` order by time desc limit ${pageSize} offset ${off}`;
-    return str;
+    condition += ` and id not in (select postid from joiner where joiner.username ="${myName}") `;
+    return condition;
 }
 
-async function getPageData(req, res) {
-    let filterOption = req.body;
-    console.log('Filter Option', filterOption);
-
-    let userInfo = req.info;
-    if (userInfo == undefined || userInfo.id == undefined) {
-        throw 'User is not defined? need re-login ?';
-    }
-    let myId = userInfo.id;
-    let myName = userInfo.name;
-    let condition = filterRequirement(filterOption, myId, myName);
-    let join =
-        'user uu join post pp join location ll on pp.userid=uu.id and pp.locname=ll.locname';
-    // select * from post pp join location ll join user uu on pp.userid=uu.id and pp.locname=ll.locname
-    // where
-    let sql1 = `select count(*) as count from `;
-    sql1 += join + condition;
-    sql1 += ';';
-    // console.log('final SQL1 ', sql1);
-    let countPost = await getPost(sql1);
-    countPost = countPost[0]['count'];
-    // console.log('count post is: ', countPost);
-
-    let totalPage = Math.ceil(countPost / filterOption.pageSize);
+// function getPageStr(pageSize, onPage) {
+//     let off = (onPage - 1) * pageSize;
+//     let str = ` order by time desc limit ${pageSize} offset ${off}`;
+//     return str;
+// }
+function getPageStr(filterOption, count) {
     let onPage = filterOption.onPage;
+    let pSize = filterOption.pageSize;
+    let totalPage = Math.ceil(count / pSize);
 
-    if (countPost === 0) {
+    if (count === 0) {
         onPage = 0;
         totalPage = 0;
     } else {
@@ -165,34 +128,121 @@ async function getPageData(req, res) {
             onPage = totalPage;
         }
     }
-    // select u.username, p.time, l.locname from user u join post p left join location l on u.id=p.userid and p.locname=l.locname where p.locname='EOSC';
-    // select u.username, p.time, p.locname from user u join post p left join location l on p.userid=u.id and p.locname=l.locname where p.locname="EOSC";
+    let off = (onPage - 1) * pSize;
+    let str = ` order by time desc limit ${pSize} offset ${off}`;
+    return [str, onPage, totalPage];
+}
 
-    // select u.username, p.time, p.locname from user u join post p on p.userid=u.id  where p.locname="EOSC";
+async function getPageData(req, res) {
+    let filterOption = req.body;
+    // console.log('Filter Option', filterOption);
 
-    let sql2 =
-        'select pp.id as postid, uu.id as userid, uu.username, uu.picture as userp, uu.email, uu.phone, pp.time, pp.description, pp.locname, pp.helper, pp.reward, ll.lat, ll.long, pp.picture as postp, ll.picture as locp from ';
+    let userInfo = req.info;
+    if (userInfo == undefined || userInfo.username == undefined) {
+        throw 'User is not defined? need re-login ?';
+    }
 
-    sql2 += join + condition;
-    sql2 += getPageStr(filterOption.pageSize, onPage);
-    sql2 += ';';
-
-    console.log('final SQL2 ', sql2);
-
-    let list = await getPost(sql2);
-
-    console.log('Result ', list);
-    // console.log('page : ', onPage, ' / ', totalPage);
-
+    let myName = userInfo.username;
+    let list, onPage, totalPage;
+    if (filterOption.isUpcoming) {
+        [list, onPage, totalPage] = await myupcoming(filterOption, myName);
+    } else if (filterOption.isSaved) {
+        [list, onPage, totalPage] = await getsaved(filterOption, myName);
+    } else {
+        [list, onPage, totalPage] = await getFiltered(filterOption, myName);
+    }
     res.status(200).json({ pageData: list, onPage, totalPage });
+}
+async function getFiltered(filterOption, myName) {
+    let condition = filterCondition(filterOption, myName);
+
+    let SQL_count = 'select count(*) as count from post ';
+    SQL_count += condition;
+    SQL_count += ';';
+    // console.log('final SQL1 ', SQL_count);
+
+    let countPost = await excQuery(SQL_count);
+    countPost = countPost[0]['count'];
+    // console.log('count post is: ', countPost);
+    let [pageStr, onPage, totalPage] = getPageStr(filterOption, countPost);
+
+    let SQL_all = 'select * from post ';
+
+    SQL_all += condition;
+    SQL_all += pageStr;
+    SQL_all += ';';
+
+    // console.log('final SQL2 ', SQL_all);
+
+    let list = await excQuery(SQL_all);
+    list = list.map((e) => {
+        return { ...e, btn: 'Join' };
+    });
+    // console.log('Post All Result List', list);
+    // console.log('page : ', onPage, ' / ', totalPage);
+    return [list, onPage, totalPage];
+}
+
+async function myupcoming(filterOption, myName) {
+    let SQL_count = `select count(*) as count from post where username="${myName}" or id in (select postid from joiner where username="${myName}");`;
+    let countPost = await excQuery(SQL_count);
+    countPost = countPost[0]['count'];
+
+    let [pageStr, onPage, totalPage] = getPageStr(filterOption, countPost);
+
+    let SQL_all = `select * from post where username="${myName}" or id in (select postid from joiner where username="${myName}") `;
+
+    SQL_all += pageStr;
+    SQL_all += ';';
+    // console.log('upcoming SQL all', SQL_all);
+    // select * from post where username="Lin" or id in (select postid from joiner where username="Lin")  order by time desc limit 3 offset 0
+    let list = await excQuery(SQL_all);
+    list = list.map((e) => {
+        if (e.username !== myName) {
+            return { ...e, btn: 'Leave' };
+        }
+        return e;
+    });
+
+    // console.log('Post Upcoming Result ', list);
+    // console.log('page : ', onPage, ' / ', totalPage);
+    return [list, onPage, totalPage];
+}
+
+async function getsaved(filterOption, myName) {
+    let condition = ` where id in (select postid from saved where username="${myName}") `;
+    let SQL_count = `select count(*) as count from post `;
+    SQL_count += condition + ';';
+
+    let countPost = await excQuery(SQL_count);
+    countPost = countPost[0]['count'];
+
+    let [pageStr, onPage, totalPage] = getPageStr(filterOption, countPost);
+
+    let SQL_all = `select * from post ` + condition + pageStr + ';';
+    let list_all = await excQuery(SQL_all);
+
+    let SQL_which_join = `select postid from joiner where username="${myName}"`;
+    let joined_posts = await excQuery(SQL_which_join);
+    joined_posts = joined_posts.map((e) => e.postid);
+    let ss = new Set(joined_posts);
+    // console.log('joined posts ', joined_posts, ss);
+    list_all = list_all.map((e) => {
+        if (ss.has(e.id)) {
+            return { ...e, btn: 'Leave' };
+        }
+        return { ...e, btn: 'Join' };
+    });
+    return [list_all, onPage, totalPage];
 }
 
 module.exports = {
     getPageData,
     postUpdate,
-    postHelp,
     postSave,
     postDelete,
     checkSaved,
     postEdit,
+    myupcoming,
+    getsaved,
 };

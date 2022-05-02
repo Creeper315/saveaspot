@@ -2,8 +2,8 @@ const Sequelize = require('sequelize');
 const DataTypes = Sequelize.DataTypes;
 const db = require('../DB/db').client;
 
-const SavedTable = db.define(
-    'Saved',
+const JoinerTable = db.define(
+    'Joiner',
     {
         id: {
             type: DataTypes.INTEGER,
@@ -11,7 +11,7 @@ const SavedTable = db.define(
             field: 'id',
         },
         username: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
             field: 'username',
         },
@@ -22,9 +22,9 @@ const SavedTable = db.define(
         },
     },
     {
-        tableName: 'Saved',
+        tableName: 'Joiner',
         timestamps: false,
     }
 );
 
-module.exports = SavedTable;
+module.exports = JoinerTable;

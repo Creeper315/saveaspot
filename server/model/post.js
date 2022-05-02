@@ -10,48 +10,39 @@ const PostTable = db.define(
             primaryKey: true,
             field: 'id',
         },
-        userId: {
+        username: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            field: 'userid',
-        },
-        time: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            field: 'time',
-        },
-        description: {
-            type: DataTypes.STRING,
-            field: 'description',
+            field: 'username',
         },
         locname: {
             type: DataTypes.STRING,
             allowNull: false,
             field: 'locname',
         },
-        helper: {
-            type: DataTypes.INTEGER,
-            field: 'helper',
-        },
-        reward: {
+        time: {
             type: DataTypes.STRING,
-            field: 'reward',
+            allowNull: false,
+            field: 'time',
         },
-        visible: {
-            type: DataTypes.INTEGER,
-            field: 'visible',
-        },
-        lat: {
-            type: DataTypes.DECIMAL,
-            field: 'lat',
-        },
-        long: {
-            type: DataTypes.DECIMAL,
-            field: 'long',
-        },
-        picture: {
+        activity: {
             type: DataTypes.STRING,
-            field: 'picture',
+            allowNull: false,
+            field: 'activity',
+        },
+        description: {
+            type: DataTypes.STRING,
+            field: 'description',
+        },
+        maxppl: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            field: 'maxppl',
+        },
+        curppl: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            field: 'curppl',
         },
     },
     {

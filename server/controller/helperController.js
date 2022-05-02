@@ -26,8 +26,4 @@ async function likeUser(req, res) {
     res.status(200).json(list);
 }
 
-async function updateUser(req, res) {
-    let id = req.info.id;
-}
-
 module.exports = { loadLocation, likeUser };

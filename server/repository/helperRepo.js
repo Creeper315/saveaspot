@@ -2,7 +2,7 @@ const Location = require('../model/location');
 const db = require('../DB/db').client;
 
 async function getLocation() {
-    let sql = `select locname, lat, long, picture from location;`;
+    let sql = `select * from location;`;
     let [list] = await db.query(sql);
     return list;
 }
@@ -12,5 +12,14 @@ async function getUserString(str) {
     let [list] = await db.query(sql);
     return list;
 }
+
+// async function onPostDelete(postid) {
+//     let SQL1 = `delete from joiner where postid=${postid};`;
+//     let SQL2 = `delete from saved where postid=${postid};`;
+
+//     await db.query(SQL1);
+//     await db.query(SQL2);
+//     return true;
+// }
 
 module.exports = { getLocation, getUserString };

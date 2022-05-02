@@ -5,11 +5,6 @@ const db = require('../DB/db').client;
 const LocationTable = db.define(
     'Location',
     {
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            field: 'id',
-        },
         locname: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -23,9 +18,9 @@ const LocationTable = db.define(
             type: DataTypes.DECIMAL,
             field: 'long',
         },
-        picture: {
+        locpic: {
             type: DataTypes.STRING,
-            field: 'picture',
+            field: 'locpic',
         },
     },
     {

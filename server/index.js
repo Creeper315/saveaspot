@@ -11,6 +11,7 @@ const { gError, authMiddle } = require('./helper');
 const authController = require('./controller/authController');
 const postController = require('./controller/postController');
 const helperController = require('./controller/helperController');
+const userController = require('./controller/userController');
 // app.use(express.static(Path.resolve(__dirname, '../client/public')));
 
 // let info = {
@@ -43,35 +44,51 @@ app.get('/', (req, res) => {
     res.send(' try get first');
 });
 
-app.post('api/test', gError(authController.test));
+app.post('/api/test', gError(authController.test));
 
 // app.post('/cookie', gError(authController.cookie));
 
 // app.post('/authMiddle', gError(authController.authMiddle));
 
 // app.post('/refresh', gError(authController.refresh));
+// 注意！这里的 app.post()， 里面的 route 的开头需要先加 /,
+// 应该是 '/api/login' 而不是 '/api/login'
+app.post('/api/login', gError(authController.login)); // authMiddle 不需要加在 login 和 register 上！
 
-app.post('api/login', gError(authController.login)); // authMiddle 不需要加在 login 和 register 上！
+app.post('/api/register', gError(authController.register));
 
-app.post('api/register', gError(authController.register));
+app.post('/api/getpost', authMiddle, gError(postController.getPageData));
 
-app.post('api/getpost', authMiddle, gError(postController.getPageData));
+app.get('/api/getuser', authMiddle, gError(userController.getuser));
 
-app.get('api/getlocation', authMiddle, gError(helperController.loadLocation));
+app.get('/api/getlocation', authMiddle, gError(helperController.loadLocation));
 
-app.post('api/likeuser', authMiddle, gError(helperController.likeUser));
+// app.post('/api/likeuser', authMiddle, gError(helperController.likeUser)); // 取消
 
-app.post('api/postupdate', authMiddle, gError(postController.postUpdate));
+app.post('/api/postupdate', authMiddle, gError(postController.postUpdate));
 
-app.post('api/posthelp', authMiddle, gError(postController.postHelp));
+app.post('/api/userupdate', authMiddle, gError(userController.userUpdate));
 
-app.post('api/postsave', authMiddle, gError(postController.postSave));
+app.post('/api/userjoin', authMiddle, gError(userController.userJoin));
 
-app.post('api/postdelete', authMiddle, gError(postController.postDelete));
+// app.post(
+//     '/api/usercanceljoin',
+//     authMiddle,
+//     gError(userController.userCancelJoin)
+// );
 
-app.post('api/checksaved', authMiddle, gError(postController.checkSaved));
+app.post('/api/postsave', authMiddle, gError(postController.postSave));
 
-app.post('api/postedit', authMiddle, gError(postController.postEdit));
+app.post('/api/postdelete', authMiddle, gError(postController.postDelete));
+
+app.post('/api/checksaved', authMiddle, gError(postController.checkSaved));
+
+app.post('/api/postedit', authMiddle, gError(postController.postEdit));
+
+// app.post('/api/myupcoming', authMiddle, gError(postController.myupcoming));
+
+// app.post('/api/getsaved', authMiddle, gError(postController.getsaved));
+
 //
 // app.post('/getpost', gError(postController.getPageData));
 
