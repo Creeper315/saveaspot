@@ -24,7 +24,7 @@ const updatePost = async (postObj) => {
             id: id,
         },
     });
-    console.log('update post result', result);
+    // console.log('update post result', result);
     return result;
 };
 

@@ -44,7 +44,7 @@ function gError(func) {
 }
 
 function createToken(data, type) {
-    // console.log('Process Env Exist? ', process.env.ACCESS_TOKEN);
+    // console.log('Process Env Exist? ',process.env.ACCESS_TOKEN);
     if (type == 'access') {
         var token = jwt.sign(data, process.env.ACCESS_TOKEN, {
             expiresIn: 100,

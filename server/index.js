@@ -63,7 +63,7 @@ app.get('/api/getuser', authMiddle, gError(userController.getuser));
 
 app.get('/api/getlocation', authMiddle, gError(helperController.loadLocation));
 
-// app.post('/api/likeuser', authMiddle, gError(helperController.likeUser)); // 取消
+app.post('/api/postcreate', authMiddle, gError(postController.postCreate)); // 取消
 
 app.post('/api/postupdate', authMiddle, gError(postController.postUpdate));
 

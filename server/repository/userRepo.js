@@ -89,6 +89,7 @@ async function getUser({ username, email }) {
         return null; // No input was provided
     }
     const [found] = await db.query(sql);
+    console.log('user is: ', found);
     // ↑ 第一个 [] 是因为，结果return出来的是 [results, metadata], 所以 [result] 只会获取 results，没有 metadata
     // 第二个 [] 是因为，select 语句 return 一个 array of rows。这里我们只找 1 个 user，所以 array length 应该是 1
     if (found.length == 0) {

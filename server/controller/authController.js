@@ -8,6 +8,7 @@ const {
 } = require('../repository/userRepo');
 
 // 注意，很多 function 都是 async，包括 hashPassword()[-]
+qwe = console.log.bind(console.log);
 
 async function login(req, res) {
     let { username, email, password } = req.body;
@@ -16,8 +17,9 @@ async function login(req, res) {
     if (got == null) {
         throw 'User Does Not Exist';
     }
+    qwe('got:', got);
     let hashed = await reHashPassword(password, got.salt);
-    // console.log('LOGIN password, hashed , got', password, hashed, got.password);
+    console.log('LOGIN password, hashed , got', password, hashed, got.password);
 
     if (got.password != hashed) {
         throw 'Password Incorrect';

@@ -12,18 +12,7 @@ const {
 const { updateUser } = require('../repository/userRepo');
 // const { onPostDelete } = require('../repository/helperRepo');
 
-const init_state = {
-    listLocation: [], // Array of location name
-    // listUser: null, // string, username Or stuid
-    // userId: null,  // 不需要这个了，因为从 authMiddle 里面，req.info 就是当前登录的 user
-    ownPost: false,
-    saved: false,
-    helpedByMe: false,
-    pageSize: 3,
-    onPage: 1,
-};
-
-// req.info === { name: u.name, id: u.id }
+// req.info === { username: u.username}
 
 async function postSave(req, res) {
     let { toSave, postid } = req.body;
@@ -37,9 +26,23 @@ async function postSave(req, res) {
     res.status(200).send('save success');
 }
 
+async function postCreate(req, res) {
+    // username TINYTEXT NOT NULL,
+    // locname not null,
+    // time TINYTEXT NOT NULL,   -- 'YYYYMMDD'
+    // description text,
+    // activity tinytext not null, -- ENUM('biking', 'hiking', 'table tennis', 'party', 'basketball', 'gaming', 'studying', 'others'),
+    // maxppl integer not null,
+    // curppl integer default 0 not null,
+    // console.log('??? ???? ', req.body);
+    let postObj = req.body;
+    await createPost(postObj);
+    res.status(200).send();
+}
+
 async function postDelete(req, res) {
     let postid = req.body.postid;
-    console.log('? postid dlt', req.body);
+    // console.log('? postid dlt', req.body);
     let r = await deletePost(postid); // 还要 delete 掉 所有的 saved，和 joined！
     // await onPostDelete(postid);
     res.status(200).send('delete success');
@@ -153,6 +156,7 @@ async function getPageData(req, res) {
     }
     res.status(200).json({ pageData: list, onPage, totalPage });
 }
+
 async function getFiltered(filterOption, myName) {
     let condition = filterCondition(filterOption, myName);
 
@@ -166,7 +170,8 @@ async function getFiltered(filterOption, myName) {
     // console.log('count post is: ', countPost);
     let [pageStr, onPage, totalPage] = getPageStr(filterOption, countPost);
 
-    let SQL_all = 'select * from post ';
+    let SQL_all =
+        'select * from post join location on post.locname=location.locname ';
 
     SQL_all += condition;
     SQL_all += pageStr;
@@ -190,7 +195,7 @@ async function myupcoming(filterOption, myName) {
 
     let [pageStr, onPage, totalPage] = getPageStr(filterOption, countPost);
 
-    let SQL_all = `select * from post where username="${myName}" or id in (select postid from joiner where username="${myName}") `;
+    let SQL_all = `select * from post join location on post.locname=location.locname where username="${myName}" or id in (select postid from joiner where username="${myName}") `;
 
     SQL_all += pageStr;
     SQL_all += ';';
@@ -219,7 +224,11 @@ async function getsaved(filterOption, myName) {
 
     let [pageStr, onPage, totalPage] = getPageStr(filterOption, countPost);
 
-    let SQL_all = `select * from post ` + condition + pageStr + ';';
+    let SQL_all =
+        `select * from post join location on post.locname=location.locname ` +
+        condition +
+        pageStr +
+        ';';
     let list_all = await excQuery(SQL_all);
 
     let SQL_which_join = `select postid from joiner where username="${myName}"`;
@@ -239,6 +248,7 @@ async function getsaved(filterOption, myName) {
 module.exports = {
     getPageData,
     postUpdate,
+    postCreate,
     postSave,
     postDelete,
     checkSaved,
