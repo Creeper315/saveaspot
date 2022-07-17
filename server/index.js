@@ -33,7 +33,7 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-app.listen(process.env.PORT || PORT, () => {
+app.listen('' + process.env.PORT || PORT, () => {
     console.log('App listening -');
     console.log('Which port? process: ', process.env.PORT);
     console.log(` Or port ${PORT}`);
