@@ -10,6 +10,10 @@ const UserTable = db.define(
             primaryKey: true,
             field: 'username',
         },
+        isgoogle: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+        },
         email: {
             type: DataTypes.STRING,
             unique: true,
@@ -18,7 +22,7 @@ const UserTable = db.define(
         },
         password: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
             field: 'password',
         },
         salt: {

@@ -9,8 +9,13 @@ const { updatePost } = require('../repository/postRepo');
 async function getuser(req, res) {
     let username = req.query.username; // 需要查找的 user 的 username
     let user = await getUser({ username });
-    delete user.password;
-    delete user.salt;
+    if (user == null) {
+        res.status(400).send('null user');
+        return;
+    }
+    if (user.password) delete user.password;
+    if (user.salt) delete user.salt;
+
     res.status(200).json(user);
 }
 

@@ -1,3 +1,4 @@
+const e = require('express');
 const { del } = require('express/lib/application');
 const req = require('express/lib/request');
 const {
@@ -95,7 +96,7 @@ function filterCondition(option, myName) {
         });
         str.join(', ');
         str = ' (' + str + ') ';
-        condition += ' and ' + 'locname in ' + str;
+        condition += ' and ' + 'post.locname in ' + str;
     }
     if (option.listActivity.length > 0) {
         let str = option.listActivity;
@@ -147,10 +148,12 @@ async function getPageData(req, res) {
 
     let myName = userInfo.username;
     let list, onPage, totalPage;
-    if (filterOption.isUpcoming) {
-        [list, onPage, totalPage] = await myupcoming(filterOption, myName);
-    } else if (filterOption.isSaved) {
-        [list, onPage, totalPage] = await getsaved(filterOption, myName);
+    if (filterOption.isOwn) {
+        [list, onPage, totalPage] = await getown(filterOption, myName);
+    } else if (filterOption.isJoined) {
+        [list, onPage, totalPage] = await getjoined(filterOption, myName);
+    } else if (filterOption.isFavorite) {
+        [list, onPage, totalPage] = await getfavorite(filterOption, myName);
     } else {
         [list, onPage, totalPage] = await getFiltered(filterOption, myName);
     }
@@ -188,33 +191,65 @@ async function getFiltered(filterOption, myName) {
     return [list, onPage, totalPage];
 }
 
-async function myupcoming(filterOption, myName) {
-    let SQL_count = `select count(*) as count from post where username="${myName}" or id in (select postid from joiner where username="${myName}");`;
+async function getown(filterOption, myName) {
+    // console.log('??? ', filterOption, myName);
+    let SQL_count = `select count(*) as count from post where username="${myName}";`;
+    let countPost = await excQuery(SQL_count);
+    countPost = countPost[0]['count'];
+
+    let [pageStr, onPage, totalPage] = getPageStr(filterOption, countPost);
+    let SQL_all = `select * from post join location on post.locname=location.locname where username="${myName}" `;
+
+    SQL_all += pageStr;
+    SQL_all += ';';
+    let list = await excQuery(SQL_all);
+    return [list, onPage, totalPage];
+}
+
+async function getjoined(filterOption, myName) {
+    let SQL_count = `select count(*) as count from post where id in (select postid from joiner where username="${myName}");`;
     let countPost = await excQuery(SQL_count);
     countPost = countPost[0]['count'];
 
     let [pageStr, onPage, totalPage] = getPageStr(filterOption, countPost);
 
-    let SQL_all = `select * from post join location on post.locname=location.locname where username="${myName}" or id in (select postid from joiner where username="${myName}") `;
+    let SQL_all = `select * from post join location on post.locname=location.locname where id in (select postid from joiner where username="${myName}") `;
 
     SQL_all += pageStr;
     SQL_all += ';';
-    // console.log('upcoming SQL all', SQL_all);
-    // select * from post where username="Lin" or id in (select postid from joiner where username="Lin")  order by time desc limit 3 offset 0
-    let list = await excQuery(SQL_all);
-    list = list.map((e) => {
-        if (e.username !== myName) {
-            return { ...e, btn: 'Leave' };
-        }
-        return e;
-    });
 
-    // console.log('Post Upcoming Result ', list);
-    // console.log('page : ', onPage, ' / ', totalPage);
+    let list = await excQuery(SQL_all);
+    list = list.map((e) => ({ ...e, btn: 'Leave' }));
     return [list, onPage, totalPage];
 }
 
-async function getsaved(filterOption, myName) {
+// async function myupcoming(filterOption, myName) {
+//     let SQL_count = `select count(*) as count from post where username="${myName}" or id in (select postid from joiner where username="${myName}");`;
+//     let countPost = await excQuery(SQL_count);
+//     countPost = countPost[0]['count'];
+
+//     let [pageStr, onPage, totalPage] = getPageStr(filterOption, countPost);
+
+//     let SQL_all = `select * from post join location on post.locname=location.locname where username="${myName}" or id in (select postid from joiner where username="${myName}") `;
+
+//     SQL_all += pageStr;
+//     SQL_all += ';';
+//     // console.log('upcoming SQL all', SQL_all);
+//     // select * from post where username="Lin" or id in (select postid from joiner where username="Lin")  order by time desc limit 3 offset 0
+//     let list = await excQuery(SQL_all);
+//     list = list.map((e) => {
+//         if (e.username !== myName) {
+//             return { ...e, btn: 'Leave' };
+//         }
+//         return e;
+//     });
+
+//     // console.log('Post Upcoming Result ', list);
+//     // console.log('page : ', onPage, ' / ', totalPage);
+//     return [list, onPage, totalPage];
+// }
+
+async function getfavorite(filterOption, myName) {
     let condition = ` where id in (select postid from saved where username="${myName}") `;
     let SQL_count = `select count(*) as count from post `;
     SQL_count += condition + ';';
@@ -253,6 +288,4 @@ module.exports = {
     postDelete,
     checkSaved,
     postEdit,
-    myupcoming,
-    getsaved,
 };

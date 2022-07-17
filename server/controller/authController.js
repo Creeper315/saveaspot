@@ -1,14 +1,51 @@
 const { hashPassword, reHashPassword, createToken } = require('../helper');
-const jwt = require('jsonwebtoken');
 const {
     updateUser,
     getUser,
     addUser,
     checkExist,
 } = require('../repository/userRepo');
+const jwt = require('jwt-decode');
+const { OAuth2Client } = require('google-auth-library');
 
-// 注意，很多 function 都是 async，包括 hashPassword()[-]
-qwe = console.log.bind(console.log);
+const qwe = console.log.bind(console.log);
+
+async function googleIn(req, res) {
+    // verify
+    //get username, email,
+    // 如果这个 google=true 的 username 已经有了，就 login
+    // 如果没有，就让他有，set google to true，然后 login
+    const { token, clientId } = req.body;
+    const client = new OAuth2Client(clientId);
+
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: clientId,
+        });
+        var payload = ticket.getPayload();
+    } catch (err) {
+        console.log('g login e', err);
+        res.status(400).send('google login err:', err);
+    }
+    let username = payload.name;
+    let email = payload.email;
+    let userpic = payload.picture;
+    // account 是否存在。
+    let got = await getUser({ username, email });
+    if (got == null) {
+        // register for this google account
+        let userObj = { username, email, userpic, isgoogle: true };
+        let createdUserId = await addUser(userObj);
+        initCookie(res, { username });
+        res.status(200).json(userObj);
+    } else {
+        // login
+        // console.log('google got', got);
+        initCookie(res, { username });
+        res.status(200).json(got);
+    }
+}
 
 async function login(req, res) {
     let { username, email, password } = req.body;
@@ -17,9 +54,9 @@ async function login(req, res) {
     if (got == null) {
         throw 'User Does Not Exist';
     }
-    qwe('got:', got);
+    // qwe('got:', got);
     let hashed = await reHashPassword(password, got.salt);
-    console.log('LOGIN password, hashed , got', password, hashed, got.password);
+    // console.log('LOGIN password, hashed , got', password, hashed, got.password);
 
     if (got.password != hashed) {
         throw 'Password Incorrect';
@@ -42,10 +79,11 @@ async function register(req, res) {
     // console.log('password, hashed ', userObj.password, hashed);
     userObj.password = hashed;
     userObj.salt = salt;
+    userObj.isgoogle = false;
     // console.log('to register obj 2', userObj);
 
     let createdUserId = await addUser(userObj);
-    console.log('register created uid ', createdUserId);
+    // console.log('register created uid ', createdUserId);
     initCookie(res, { username: userObj.username });
     delete userObj.password;
     delete userObj.salt;
@@ -87,16 +125,26 @@ function initCookie(res, userInfo) {
     let token1 = createToken(userInfo, 'access');
     let token2 = createToken(userInfo, 'refresh');
     // console.log('My Access Token is: ', token1);
-    res.cookie('ACCESS_TOKEN', token1);
-    res.cookie('REFRESH_TOKEN', token2);
+    res.cookie('ACCESS_TOKEN', token1, { httpOnly: true });
+    res.cookie('REFRESH_TOKEN', token2, { httpOnly: true });
+    // res.cookie('ACCESS_TOKEN', token1);
+    // res.cookie('REFRESH_TOKEN', token2);
     // res.send('cookie success?');
     // res.status(200).json(c);
+}
+
+async function logout(req, res) {
+    res.cookie('ACCESS_TOKEN', null);
+    res.cookie('REFRESH_TOKEN', null);
+    res.status(200).send('ok');
 }
 
 module.exports = {
     login,
     register,
     test,
+    googleIn,
+    logout,
     // authMiddle,
     // refresh,
 };

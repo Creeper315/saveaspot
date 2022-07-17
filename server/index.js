@@ -40,7 +40,7 @@ app.listen(process.env.PORT || PORT, () => {
 });
 
 app.get('/', (req, res) => {
-    console.log('req.cookie ', req.cookies, 'req.info', req.info);
+    // console.log('req.cookie ', req.cookies, 'req.info', req.info);
     res.send(' try get first');
 });
 
@@ -55,7 +55,17 @@ app.post('/api/test', gError(authController.test));
 // 应该是 '/api/login' 而不是 '/api/login'
 app.post('/api/login', gError(authController.login)); // authMiddle 不需要加在 login 和 register 上！
 
+app.post('/api/googlein', gError(authController.googleIn));
+
 app.post('/api/register', gError(authController.register));
+
+app.post('/api/logout', gError(authController.logout));
+
+app.post(
+    '/api/checktoken',
+    authMiddle,
+    gError(async (req, res) => res.status(200).send('ok'))
+);
 
 app.post('/api/getpost', authMiddle, gError(postController.getPageData));
 

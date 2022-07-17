@@ -17,9 +17,7 @@ async function loadLocation(req, res) {
 
 async function likeUser(req, res) {
     let str = req.body.str;
-    console.log('likeUser ', str);
     let list = await getUserString(str);
-    console.log('like found ', list);
     list = list.map((e) => {
         return { ...e, label: e.username };
     });

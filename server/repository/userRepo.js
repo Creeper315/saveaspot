@@ -3,9 +3,18 @@ const db = require('../DB/db').client;
 
 //  username, password, salt, phone, email, userpic
 
-async function addUser({ username, email, password, salt, phone, userpic }) {
+async function addUser({
+    isgoogle,
+    username,
+    email,
+    password,
+    salt,
+    phone,
+    userpic,
+}) {
     try {
         const r = await UserTable.create({
+            isgoogle: isgoogle,
             username: username,
             email: email,
             password: password,
@@ -25,7 +34,7 @@ async function addUserNotUsed({ username, email, password, phone, userpic }) {
     const [results, metadata] = await db.query(
         `insert into user (username, email, password, phone, userpic) values (${username}, ${email}, ${password},${phone},${userpic});`
     );
-    console.log('Add User ', results, 'META ', metadata, metadata.lastID);
+    // console.log('Add User ', results, 'META ', metadata, metadata.lastID);
     return metadata.lastID;
 }
 
@@ -54,7 +63,7 @@ async function updateUser(userObj) {
             username: username,
         },
     });
-    console.log('update result ', result);
+    // console.log('update result ', result);
     return result;
     // } catch (err) {
     //     // throw new Error(err);
@@ -80,6 +89,7 @@ async function checkExist(userObj) {
 async function getUser({ username, email }) {
     // get list of user satisfying one of these values. (因为这些值都是 unique，所以按理说只会拿到 1 个 row 的 user)
     // console.log('get user ', [id, username, email]);
+
     let sql = '';
     if (username != undefined) {
         sql = `select * from user where username = "${username}"`;
@@ -89,7 +99,7 @@ async function getUser({ username, email }) {
         return null; // No input was provided
     }
     const [found] = await db.query(sql);
-    console.log('user is: ', found);
+    // console.log('user is: ', found);
     // ↑ 第一个 [] 是因为，结果return出来的是 [results, metadata], 所以 [result] 只会获取 results，没有 metadata
     // 第二个 [] 是因为，select 语句 return 一个 array of rows。这里我们只找 1 个 user，所以 array length 应该是 1
     if (found.length == 0) {
