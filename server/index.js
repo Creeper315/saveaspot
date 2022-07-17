@@ -41,12 +41,12 @@ app.listen(process.env.PORT || PORT, () => {
 
 app.get('/', (req, res) => {
     // console.log('req.cookie ', req.cookies, 'req.info', req.info);
-    res.send(' try get second');
+    res.send(' try get second!');
 });
 
 app.post('/', (req, res) => {
     console.log('post //// here');
-    res.send(' try get first');
+    res.send(' try get second');
 });
 
 app.post('/login', (req, res) => {
