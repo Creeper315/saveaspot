@@ -29,7 +29,7 @@ const corsOptions = {
 };
 
 // app.use(cors(corsOptions)); // Only allow localhost accessing it
-// app.use(cors());
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
@@ -41,6 +41,16 @@ app.listen(process.env.PORT || PORT, () => {
 
 app.get('/', (req, res) => {
     // console.log('req.cookie ', req.cookies, 'req.info', req.info);
+    res.send(' try get second');
+});
+
+app.post('/', (req, res) => {
+    console.log('post //// here');
+    res.send(' try get first');
+});
+
+app.post('/login', (req, res) => {
+    console.log('post login hereee');
     res.send(' try get first');
 });
 

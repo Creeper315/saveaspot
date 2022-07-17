@@ -38,3 +38,7 @@ DELETE FROM user Where username = 'richard';
 Lin - zhuzhu
 
 select locname, time, username, description from post join user on post.userid = user.id order by time desc;
+
+
+
+
