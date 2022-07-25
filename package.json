@@ -19,6 +19,7 @@
     "google-auth-library": "^8.1.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.1.2",
+    "mysql": "^2.18.1",
     "sequelize": "^6.18.0"
   }
 }

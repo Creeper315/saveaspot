@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 async function hashPassword(password) {
     let salt = await bcrypt.genSalt();
@@ -43,8 +44,8 @@ function gError(func) {
 }
 
 function createToken(data, type) {
-    console.log('Process Env Exist? ', process.env.ACCESS_TOKEN);
-    console.log('create token', data, type);
+    // console.log('Process Env Exist? ', process.env.ACCESS_TOKEN);
+    // console.log('create token', data, type);
     if (type == 'access') {
         var token = jwt.sign(data, '' + process.env.ACCESS_TOKEN, {
             expiresIn: 60,
@@ -60,7 +61,7 @@ function createToken(data, type) {
 
 function authMiddle(req, res, next) {
     // user 拿到 token，现在准备 request，
-    console.log('auth middle req c ', req.cookies);
+    // console.log('auth middle req c ', req.cookies);
     let token = req.cookies.ACCESS_TOKEN;
     // console.log('token got is : ', token);
     if (token == undefined) {

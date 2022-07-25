@@ -32,8 +32,8 @@ const corsOptions = {
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
-
-app.listen('' + process.env.PORT || PORT, () => {
+// console.log('add!', '' + process.env.PORT, PORT);
+app.listen(process.env.PORT || PORT, () => {
     console.log('App listening -');
     console.log('Which port? process: ', process.env.PORT);
     console.log(` Or port ${PORT}`);
@@ -45,12 +45,10 @@ app.get('/', (req, res) => {
 });
 
 app.post('/', (req, res) => {
-    console.log('post //// here');
     res.send(' try get second');
 });
 
 app.post('/login', (req, res) => {
-    console.log('post login hereee');
     res.send(' try get first');
 });
 

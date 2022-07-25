@@ -8,8 +8,6 @@ const {
 const jwt = require('jwt-decode');
 const { OAuth2Client } = require('google-auth-library');
 
-const qwe = console.log.bind(console.log);
-
 async function googleIn(req, res) {
     // verify
     //get username, email,
@@ -25,7 +23,7 @@ async function googleIn(req, res) {
         });
         var payload = ticket.getPayload();
     } catch (err) {
-        console.log('g login e', err);
+        // console.log('g login e', err);
         res.status(400).send('google login err:', err);
     }
     let username = payload.name;
@@ -48,6 +46,7 @@ async function googleIn(req, res) {
 }
 
 async function login(req, res) {
+    // console.log('has header?');
     let { username, email, password } = req.body;
 
     let got = await getUser({ username, email });

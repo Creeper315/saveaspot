@@ -23,6 +23,8 @@ INSERT INTO Users(email, secret, name) VALUES(‘admin@saveaspot.com’, ‘Save
 
 .read ../server/DB/script.js/insert.sql
 
+.read ../server/DB/script.js/update.sql
+
 
 查看 table 结构
 
